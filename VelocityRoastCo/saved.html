@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Velocity Roast Co. | Saved</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header id="top">
+      <img src="images/Screenshot 2026-09-29 193508.png" alt="Premium Logo">
+      <h1>Velocity Roast Co.</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="build.html">Build</a>
+        <a href="saved.html">Saved</a>
+        <a href="cart.html">Cart</a>
+      </nav>
+    </header>
+
+    <section>
+      <h2>Saved Blends</h2>
+
+      <p id="emptySaved" hidden>No saved blends yet.</p>
+      <ul id="savedList"></ul>
+    </section>
+
+    <script>
+      const savedStorageKey = 'velocityRoastSaved';
+      const savedList = document.getElementById('savedList');
+      const emptySaved = document.getElementById('emptySaved');
+      const savedBlends = JSON.parse(localStorage.getItem(savedStorageKey) || '[]');
+
+      function renderSaved() {
+        if (!savedBlends.length) {
+          emptySaved.hidden = false;
+          savedList.innerHTML = '';
+          return;
+        }
+
+        emptySaved.hidden = true;
+        savedList.innerHTML = savedBlends.map(function (item, index) {
+          const flavorText = item.flavor && item.flavor !== 'None' ? ' | Flavor: ' + item.flavor : '';
+          const organicText = item.organic ? ' | Organic / Fair Trade' : '';
+          return '<li><strong>' + item.name + '</strong><br>' +
+            item.origin + ' | ' + item.roast + ' | ' + item.grind + ' | ' + item.size + flavorText + organicText + '<br>' +
+            'Total: $' + Number(item.total).toFixed(2) +
+            '<div><button type="button" data-action="add" data-index="' + index + '">Add to Cart</button>' +
+            ' <button type="button" data-action="delete" data-index="' + index + '">Delete</button></div></li>';
+        }).join('');
+
+        savedList.querySelectorAll('button').forEach(function (button) {
+          button.addEventListener('click', function () {
+            const index = Number(button.getAttribute('data-index'));
+            const action = button.getAttribute('data-action');
+
+            if (action === 'add') {
+              const cart = JSON.parse(localStorage.getItem('velocityRoastCart') || '[]');
+              cart.push(savedBlends[index]);
+              localStorage.setItem('velocityRoastCart', JSON.stringify(cart));
+              window.location.href = 'cart.html';
+              return;
+            }
+
+            const confirmed = window.confirm('Delete this saved blend?');
+            if (!confirmed) {
+              return;
+            }
+            savedBlends.splice(index, 1);
+            localStorage.setItem(savedStorageKey, JSON.stringify(savedBlends));
+            renderSaved();
+          });
+        });
+      }
+
+      renderSaved();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Velocity Roast Co. | Build</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header id="top">
+      <img src="images/Screenshot 2026-09-29 193508.png" alt="Premium Logo">
+      <h1>Velocity Roast Co.</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="build.html">Build</a>
+        <a href="saved.html">Saved</a>
+        <a href="cart.html">Cart</a>
+      </nav>
+    </header>
+
+    <section>
+      <h2>Build Your Signature Blend</h2>
+    </section>
+
+    <form>
+      <fieldset>
+        <legend>1. Coffee Origin</legend>
+        <label><input type="radio" name="origin" value="Ethiopian Yirgacheffe" checked /> <span>Ethiopian Yirgacheffe (Floral &amp; bright)</span></label><br />
+        <label><input type="radio" name="origin" value="Colombian Supremo" /> <span>Colombian Supremo (Balanced &amp; nutty)</span></label><br />
+        <label><input type="radio" name="origin" value="Sumatra Mandheling" /> <span>Sumatra Mandheling (Bold &amp; earthy)</span></label><br />
+        <label><input type="radio" name="origin" value="Guatemalan Antigua" /> <span>Guatemalan Antigua (Chocolatey &amp; smooth)</span></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>2. Roast Level</legend>
+        <label><input type="radio" name="roast" value="Light Roast" checked /> <span>Light Roast</span></label><br />
+        <label><input type="radio" name="roast" value="Medium Roast" /> <span>Medium Roast</span></label><br />
+        <label><input type="radio" name="roast" value="Dark Roast" /> <span>Dark Roast</span></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>3. Grind Type</legend>
+        <label><input type="radio" name="grind" value="Whole Bean" checked /> <span>Whole Bean</span></label><br />
+        <label><input type="radio" name="grind" value="Coarse (French Press)" /> <span>Coarse (French Press)</span></label><br />
+        <label><input type="radio" name="grind" value="Medium (Drip / Pour Over)" /> <span>Medium (Drip / Pour Over)</span></label><br />
+        <label><input type="radio" name="grind" value="Fine (Espresso)" /> <span>Fine (Espresso)</span></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>4. Special Add-ons / Customizations</legend>
+        <div>
+          <label><input type="checkbox" id="flavorBoostToggle" /> <span>Flavor Notes Boost — +$2.00</span></label>
+        </div>
+        <div>
+          <label><input type="radio" name="flavorOption" value="Vanilla" disabled /> <span>Vanilla</span></label>
+        </div>
+        <div>
+          <label><input type="radio" name="flavorOption" value="Dark Chocolate" disabled /> <span>Dark Chocolate</span></label>
+        </div>
+        <div>
+          <label><input type="radio" name="flavorOption" value="Hazelnut" disabled /> <span>Hazelnut</span></label>
+        </div>
+        <div>
+          <label><input type="checkbox" id="organic" /> <span>Organic / Fair Trade Certified Batch — +$3.00</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>5. Personalization</legend>
+        <label for="bagNameInput">Custom Bag Name:</label>
+        <input id="bagNameInput" type="text" value="Morning Surge" placeholder="Enter a blend name" />
+      </fieldset>
+
+      <fieldset>
+        <legend>6. Bag Size &amp; Pricing</legend>
+        <label><input type="radio" name="size" value="12" checked /> <span>12 oz Bag (Standard): $18.00 base price</span></label><br />
+        <label><input type="radio" name="size" value="16" /> <span>16 oz Bag (Large): $22.00 base price</span></label>
+      </fieldset>
+    </form>
+<section>
+    <h2>Coffee Bag Preview</h2>
+    <div>
+      <p><strong id="bagNameDisplay">Morning Surge</strong></p>
+      <p id="bagOriginDisplay">Ethiopian Yirgacheffe</p>
+      <p id="bagRoastDisplay">Light Roast</p>
+      <p id="bagGrindDisplay">Whole Bean</p>
+      <p id="bagSizeDisplay">12 oz</p>
+    </div>
+
+    <h2>Pricing Summary</h2>
+    <ul>
+      <li>Base Price: <span id="basePrice">$18.00</span></li>
+      <li id="flavorRow" hidden>Flavor Notes Boost: +$2.00</li>
+      <li id="organicRow" hidden>Organic / Fair Trade: +$3.00</li>
+      <li>Total: <strong id="totalPrice">$18.00</strong></li>
+    </ul>
+
+    <button type="button" id="addToCartButton">Add to Cart</button>
+    <button type="button" id="saveBlendButton">Save Blend</button>
+</section>
+    <script>
+      const basePrices = { 12: 18, 16: 22 };
+      const cartStorageKey = 'velocityRoastCart';
+      const savedStorageKey = 'velocityRoastSaved';
+
+      const elements = {
+        bagNameInput: document.getElementById('bagNameInput'),
+        bagNameDisplay: document.getElementById('bagNameDisplay'),
+        bagOriginDisplay: document.getElementById('bagOriginDisplay'),
+        bagRoastDisplay: document.getElementById('bagRoastDisplay'),
+        bagGrindDisplay: document.getElementById('bagGrindDisplay'),
+        bagSizeDisplay: document.getElementById('bagSizeDisplay'),
+        basePrice: document.getElementById('basePrice'),
+        totalPrice: document.getElementById('totalPrice'),
+        flavorRow: document.getElementById('flavorRow'),
+        organicRow: document.getElementById('organicRow')
+      };
+
+      function money(value) {
+        return '$' + value.toFixed(2);
+      }
+
+      function getCurrentSelection() {
+        const selectedOrigin = document.querySelector('input[name="origin"]:checked');
+        const selectedRoast = document.querySelector('input[name="roast"]:checked');
+        const selectedGrind = document.querySelector('input[name="grind"]:checked');
+        const selectedSize = document.querySelector('input[name="size"]:checked');
+        const selectedFlavor = document.querySelector('input[name="flavorOption"]:checked');
+        const bagName = elements.bagNameInput.value.trim() || 'Your Custom Roast';
+
+        const flavorBoostToggle = document.getElementById('flavorBoostToggle');
+        const flavorBoost = flavorBoostToggle.checked && !!selectedFlavor;
+        const organic = document.getElementById('organic').checked;
+        const basePrice = basePrices[selectedSize.value];
+        const addOnTotal = (flavorBoost ? 2 : 0) + (organic ? 3 : 0);
+        const totalPrice = basePrice + addOnTotal;
+
+        return {
+          name: bagName,
+          origin: selectedOrigin.value,
+          roast: selectedRoast.value,
+          grind: selectedGrind.value,
+          size: selectedSize.value + ' oz',
+          flavor: flavorBoost ? selectedFlavor.value : 'None',
+          organic: organic,
+          total: totalPrice,
+          basePrice: basePrice,
+          addOnTotal: addOnTotal
+        };
+      }
+
+      function addToCart() {
+        const cart = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
+        const selection = getCurrentSelection();
+        cart.push(selection);
+        localStorage.setItem(cartStorageKey, JSON.stringify(cart));
+        window.location.href = 'cart.html';
+      }
+
+      function saveBlend() {
+        const saved = JSON.parse(localStorage.getItem(savedStorageKey) || '[]');
+        const selection = getCurrentSelection();
+        saved.push(selection);
+        localStorage.setItem(savedStorageKey, JSON.stringify(saved));
+        window.location.href = 'saved.html';
+      }
+
+      function updatePreview() {
+        const selectedOrigin = document.querySelector('input[name="origin"]:checked');
+        const selectedRoast = document.querySelector('input[name="roast"]:checked');
+        const selectedGrind = document.querySelector('input[name="grind"]:checked');
+        const selectedSize = document.querySelector('input[name="size"]:checked');
+        const selectedFlavor = document.querySelector('input[name="flavorOption"]:checked');
+        const bagName = elements.bagNameInput.value.trim() || 'Your Custom Roast';
+
+        const flavorBoostToggle = document.getElementById('flavorBoostToggle');
+        const flavorBoost = flavorBoostToggle.checked && !!selectedFlavor;
+        const organic = document.getElementById('organic').checked;
+
+        const flavorInputs = document.querySelectorAll('input[name="flavorOption"]');
+        flavorInputs.forEach(function (input) {
+          input.disabled = !flavorBoostToggle.checked;
+          if (!flavorBoostToggle.checked && input.checked) {
+            input.checked = false;
+          }
+        });
+
+        const basePrice = basePrices[selectedSize.value];
+        const addOnTotal = (flavorBoost ? 2 : 0) + (organic ? 3 : 0);
+        const totalPrice = basePrice + addOnTotal;
+
+        elements.bagNameDisplay.textContent = bagName;
+        elements.bagOriginDisplay.textContent = selectedOrigin.value;
+        elements.bagRoastDisplay.textContent = selectedRoast.value;
+        elements.bagGrindDisplay.textContent = selectedGrind.value;
+        elements.bagSizeDisplay.textContent = selectedSize.value + ' oz';
+
+        elements.basePrice.textContent = money(basePrice);
+        elements.totalPrice.textContent = money(totalPrice);
+
+        elements.flavorRow.hidden = !flavorBoost;
+        if (flavorBoost) {
+          elements.flavorRow.textContent = 'Flavor Notes Boost (' + selectedFlavor.value + '): +$2.00';
+        }
+        elements.organicRow.hidden = !organic;
+      }
+
+      document.querySelectorAll('input').forEach(function (input) {
+        input.addEventListener('input', updatePreview);
+        input.addEventListener('change', updatePreview);
+      });
+
+      document.getElementById('addToCartButton').addEventListener('click', addToCart);
+      document.getElementById('saveBlendButton').addEventListener('click', saveBlend);
+      updatePreview();
+    </script>
+  </body>
+</html>
